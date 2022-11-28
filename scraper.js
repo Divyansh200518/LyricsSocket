@@ -79,6 +79,7 @@ io.on('connection',socket =>{
     socket.on('message',(message)=>{
         var searchQuery = message
         var url = "https://www.jiosaavn.com/search/"+searchQuery
+        io.emit('message', "searching")
         scrapeSong(url)
     })
 
