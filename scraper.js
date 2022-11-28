@@ -67,7 +67,7 @@ async function scrapeSong(url) {
 
 
 const http = require('http').createServer();
-const port = 3000;
+const port = process.env.PORT;
 const hostname = '0.0.0.0';
 const io = require('socket.io')(http,{
     cors:{origin: "*"}
