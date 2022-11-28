@@ -19,7 +19,7 @@ const dataObjectArray = []
 
 
 async function scrapeSong(url) {
-    const browser = await puppeteer.launch({ headless: true, executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', });
+    const browser = await puppeteer.launch({ headless: true, executablePath: executablePath() });
     const page = await browser.newPage();
     await page.goto(url);
     const elements = await page.$x('//*[@id="root"]/div[2]/div[1]/div/main/div/div/section/ol/li[1]/div/article/div[2]/figure/div/img')
