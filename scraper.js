@@ -1,20 +1,9 @@
-// const { writeFile } = require('fs');
-// const { setTimeout } = require('timers/promises');
-// const { clearInterval } = require('timers');
-
 const puppeteer = require('puppeteer-extra')
 const StealthPlugin = require('puppeteer-extra-plugin-stealth')
 
 puppeteer.use(StealthPlugin())
 
 const { executablePath } = require('puppeteer');
-const { setTimeout } = require("timers/promises");
-const { clearInterval } = require("timers");
-const { type } = require("os");
-
-// const path = './music.json';
-const dataObjectArray = []
-
 
 
 async function scrapeSong(url) {
@@ -50,4 +39,4 @@ io.on('connection', socket => {
 })
 
 // http.listen(8080, () =>console.log('listening on http://localhost:8080'));
-http.listen(process.env.PORT || PORT, '0.0.0.0', () => console.log(`listening on ${process.env.PORT}`));
+http.listen(process.env.PORT || PORT, '0.0.0.0', () => console.log(`listening on ${PORT}`));
