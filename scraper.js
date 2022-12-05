@@ -1,42 +1,57 @@
-const puppeteer = require('puppeteer-extra')
-const StealthPlugin = require('puppeteer-extra-plugin-stealth')
+const fetch = require('node-fetch')
+var express = require('express');
+var app = express();
+const cors = require('cors');
 
-puppeteer.use(StealthPlugin())
+app.use(cors({
+    origin: '*'
+}));
 
-const { executablePath } = require('puppeteer');
 
+async function getLyrics(query) {
+    try {
+        const res = await fetch(`https://www.google.com/search?q=${query}+lyrics`)
+        const body = await res.text();
+        var data = []
+        data = body.split('Source:')
+        data = data[0].split('<div class="hwx">')
 
-async function scrapeSong(url) {
-    const browser = await puppeteer.launch({ headless: true, executablePath: executablePath() });
-    const page = await browser.newPage();
-    await page.goto(url);
-    const [lyricsElement] = await page.$$('.xaAUmb');
-    const lyrics = await lyricsElement.getProperty('innerText');
-    const lyricsTxt = await lyrics.jsonValue();
-    browser.close()
-    return lyricsTxt
+        var lyrics = data[1]
+        var actualLyrics = ""
+        var insert = true
+        for (let index = 0; index < lyrics.length; index++) {
+            if (lyrics[index] == "<") {
+                insert = false
+            }
+            if (lyrics[index] == ">") {
+                insert = true
+            }
+            if (insert == true) {
+                if (lyrics[index] != ">") {
+                    actualLyrics += lyrics[index]
+                }
+            }
+
+        }
+    } catch (error) {
+
+    }
+    return actualLyrics
 }
 
 
-const http = require('http').createServer();
-const PORT = 5000;
-const io = require('socket.io')(http, {
-    cors: { origin: "*" }
+app.get('/:query', async function (req, res) {
+    var query = req.params.query
+    var lyrics = await getLyrics(query)
+    console.log(query)
+    res.end(JSON.stringify(lyrics));
 })
 
-io.on('connection', socket => {
-    console.log("A user connected")
-    socket.on('message', async (message) => {
-        io.emit('confirmation', "confirmed")
-        var searchQuery = message
-        searchQuery = searchQuery.split(" ")
-        searchQuery = searchQuery.join("+")
-        var url = "https://www.google.com/search?q=" + searchQuery + "+lyrics"
-        lyrics = await scrapeSong(url)
-        io.emit('message', lyrics)
-    })
+// Listen on a specific host via the HOST environment variable
+var host = process.env.HOST || '0.0.0.0';
+// Listen on a specific port via the PORT environment variable
+var port = process.env.PORT || 8080;
 
-})
-
-// http.listen(8080, () =>console.log('listening on http://localhost:8080'));
-http.listen(process.env.PORT || PORT, '0.0.0.0', () => console.log(`listening on ${PORT}`));
+app.listen(port, host, function () {
+    console.log('Running on ' + host + ':' + port);
+});
