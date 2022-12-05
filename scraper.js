@@ -50,4 +50,4 @@ io.on('connection', socket => {
 })
 
 // http.listen(8080, () =>console.log('listening on http://localhost:8080'));
-http.listen(process.env.PORT || PORT, '0.0.0.0', () => console.log(`listening on ${PORT}`));
+http.listen(process.env.PORT || PORT, '0.0.0.0', () => console.log(`listening on ${process.env.PORT}`));
