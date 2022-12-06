@@ -42,6 +42,7 @@ async function getLyrics(query) {
 
 app.get('/:query', async function (req, res) {
     var query = req.params.query
+    query = (query.split(" ")).join("+")
     var lyrics = await getLyrics(query)
     console.log(query)
     res.end(JSON.stringify(lyrics));
