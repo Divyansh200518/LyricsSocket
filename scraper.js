@@ -66,10 +66,8 @@ async function getLyrics(query, language) {
                 }
                 if (body[index + 1] == ">") {
                     found = false
-                    console.log(atag)
                     if (atag.includes("https://lyricsknow.com")) {
                         link = atag.split("q=")[1].split("&amp")[0]
-                        console.log(link)
                         break
                     }
                     atag = ""
