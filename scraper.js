@@ -8,45 +8,98 @@ app.use(cors({
 }));
 
 
-async function getLyrics(query) {
+async function getLyrics(query, language) {
     try {
-        const res = await fetch(`https://www.google.com/search?q=${query}+lyrics`)
-        const body = await res.text();
-        var data = []
-        data = body.split('Source:')
-        data = data[0].split('<div class="hwx">')
-
-        var lyrics = data[1]
-        var actualLyrics = ""
-        var insert = true
-        for (let index = 0; index < lyrics.length; index++) {
-            if (lyrics[index] == "<") {
-                insert = false
-            }
-            if (lyrics[index] == ">") {
-                insert = true
-            }
-            if (insert == true) {
-                if (lyrics[index] != ">") {
-                    actualLyrics += lyrics[index]
+        if (language == "english") {
+            const res = await fetch(`https://www.google.com/search?q=${query}+lyrics+musixmatch`)
+            const body = await res.text();
+            var index = 0
+            var atag = ""
+            var found = false
+            var link = ""
+            while (index < body.length) {
+                if (body[index] == "<" && body[index + 1] == "a") {
+                    found = true
+                    index++
                 }
+                if (found) {
+                    atag += body[index]
+                }
+                if (body[index + 1] == ">") {
+                    found = false
+
+                    if (atag.includes("https://www.musixmatch.com")) {
+                        link = atag.split("q=")[1].split("&amp")[0]
+                        break
+                    }
+
+                    atag = ""
+                }
+                index++
             }
 
+
+
+
+            const resLyrics = await fetch(link)
+            const bodyLyrics = await resLyrics.text();
+            data = bodyLyrics.split('<span class="lyrics__content__ok">')
+            var lyrics = ""
+            lyrics += data[1].split("</span>")[0] + "\n"
+            lyrics += data[2].split("</span>")[0]
         }
+
+        else if (language == "hindi") {
+            const res = await fetch(`https://www.google.com/search?q=${query}+lyrics+lyricsknow`)
+            const body = await res.text();
+            var index = 0
+            var atag = ""
+            var found = false
+            var link = ""
+            while (index < body.length) {
+                if (body[index] == "<" && body[index + 1] == "a") {
+                    found = true
+                    index++
+                }
+                if (found) {
+                    atag += body[index]
+                }
+                if (body[index + 1] == ">") {
+                    found = false
+                    console.log(atag)
+                    if (atag.includes("https://lyricsknow.com")) {
+                        link = atag.split("q=")[1].split("&amp")[0]
+                        console.log(link)
+                        break
+                    }
+                    atag = ""
+                }
+                index++
+            }
+
+            const resLyrics = await fetch(link)
+            const bodyLyrics = await resLyrics.text();
+            lyrics = bodyLyrics.split("text-align: center;'>")[1].split("<style>")[0].split("\n")
+            lyrics = lyrics.join("")
+        }
+
     } catch (error) {
 
     }
-    return actualLyrics
+    return lyrics
 }
 
-
-app.get('/:query', async function (req, res) {
+app.get('/:query/:language', async function (req, res) {
     var query = req.params.query
     query = (query.split(" ")).join("+")
-    var lyrics = await getLyrics(query)
-    console.log("Searching the lyrics...")
+    var language = req.params.language
+    if (language == undefined || language == "undefined") {
+        language = "hindi"
+    }
+    var lyrics = await getLyrics(query, language)
     res.end(JSON.stringify(lyrics));
 })
+
 
 // Listen on a specific host via the HOST environment variable
 var host = process.env.HOST || '0.0.0.0';
